@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>二叉查找树的绘制</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100%;
+            width: 100%;
+        }
+
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
+        #demo {
+            background: #efefef;
+        }
+
+        .input-wrap {
+            margin: 20px 0 0 20px
+        }
+    </style>
+    <script src="1.js">
+
+    </script>
+</head>
+<body>
+
+<div id="wrap">
+    <div class="input-wrap">
+        <p>请用单字符 , 分割数字</p>
+        <input id="JSinput">
+        <input type="button" value="生成二叉树" id="JSbutton">
+    </div>
+    <canvas id="demo"></canvas>
+</div>
+
+
+<script>
+
+    document.getElementById('JSbutton').onclick = function () {
+        let arr = [];
+        arr = document.getElementById('JSinput').value.split(',')
+       arr=arr.map(item=>{
+           return parseInt(item)
+       })
+        view(arr)
+    }
+
+    function view(arr) {
+        const width = 16;
+        const height = 100;
+        const nodeDia = 40;
+
+        let tree = new Bst();
+        let canvas = document.getElementById('demo');
+        let ctx = canvas.getContext('2d');
+
+
+        const setCanvansView = function (canvas) {
+            let result = 0;
+            console.log(tree.level)
+            for (let i = 0; i < tree.level; i++) {
+                console.log((Math.pow(2, tree.level - i)) * (width) * 2)
+                result += (Math.pow(2, tree.level - i)) * (width)
+            }
+            console.log(width)
+            canvas.width = result
+
+            canvas.height = (tree.level ) * height + nodeDia * (tree.level + 1);
+        }
+
+        const nodeFn = function (node) {//设置根节点的圆心和底部点
+            node.circleCenter.x = canvas.width / 2;
+            node.circleCenter.y = nodeDia / 2;
+            node.bottom.x = node.circleCenter.x;
+            node.bottom.y = node.circleCenter.y + nodeDia / 2;
+        };
+        const leftFn = function (node) {//设置左节点的各店坐标
+            let distance = (Math.pow(2, tree.level - node.deep)) * (width)
+
+            node.circleCenter.x = node.parent.circleCenter.x - distance;
+            node.circleCenter.y = node.parent.circleCenter.y + height
+            node.top.x = node.circleCenter.x;
+            node.top.y = node.circleCenter.y - nodeDia / 2;
+            node.bottom.x = node.circleCenter.x;
+            node.bottom.y = node.circleCenter.y + nodeDia / 2;
+        }
+
+        const rightFn = function (node) {//设置右节点的各店坐标
+            let distance = (Math.pow(2, tree.level - node.deep) ) * (width)
+
+            node.circleCenter.x = node.parent.circleCenter.x + distance;
+            node.circleCenter.y = node.parent.circleCenter.y + height;
+            node.top.x = node.circleCenter.x;
+            node.top.y = node.circleCenter.y - nodeDia / 2;
+            node.bottom.x = node.circleCenter.x;
+            node.bottom.y = node.circleCenter.y + nodeDia / 2;
+        }
+
+
+        arr.forEach(item => {
+            tree.insert(item)
+        });
+        setCanvansView(canvas);
+        tree.preOrder(tree.root, node => {
+            ctx.beginPath();
+            if (node.direction == null) {
+                nodeFn(node)
+            } else if (node.direction == 1) {
+                leftFn(node)
+            } else if (node.direction == 2) {
+                rightFn(node);
+            }
+            ctx.arc(node.circleCenter.x, node.circleCenter.y, nodeDia / 2, 0, 360, false);
+            ctx.fillText(node.data, node.circleCenter.x - nodeDia / 8, node.circleCenter.y + nodeDia / 8)
+            ctx.strokeStyle = "black";
+            ctx.moveTo(node.top.x, node.top.y);
+            if (node.parent) {
+                ctx.lineTo(node.parent.bottom.x, node.parent.bottom.y)
+            }
+            ctx.stroke();
+            ctx.closePath();
+        })
+        console.log(tree)
+    }
+</script>
+</body>
+</html>
